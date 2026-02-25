@@ -164,6 +164,51 @@ npm run test:recovery-script
 - Env docs: root `.env.example`
 - Documentation: this `README.md`
 
+## Evaluator Quick Run
+
+Use this sequence for a clean verification pass:
+
+```bash
+docker compose up -d --build
+docker compose ps
+npm test
+```
+
+Optional script validations (requires deployment-derived env vars):
+
+```bash
+npm run test:e2e-script
+npm run test:recovery-script
+npm run test:governance-script
+```
+
+## Core Requirements Traceability
+
+1. **Containerization + health checks**: `docker-compose.yml` defines `chain-a`, `chain-b`, `deployer`, `relayer`, and `frontend`, each with health checks.
+2. **Environment template**: root `.env.example` documents chain RPC, relayer, contract addresses, and frontend vars.
+3. **ERC20Votes token**: `contracts/GovernanceToken.sol` extends OpenZeppelin ERC20Votes.
+4. **Delegation support**: `GovernanceToken.delegate(address)` with `DelegateChanged` emission.
+5. **Proposal threshold**: `contracts/MyGovernor.sol` enforces `proposalThreshold()` for proposal creation.
+6. **Governor lifecycle**: proposal states are handled through OpenZeppelin Governor state machine (`Pending`, `Active`, `Succeeded`, `Defeated`, `Executed`).
+7. **Voting window**: `votingDelay()` and `votingPeriod()` are configured and vote timing is enforced.
+8. **Standard voting**: `MyGovernor.VotingType.Standard` maps 1 token to 1 vote.
+9. **Quadratic voting**: `MyGovernor.VotingType.Quadratic` applies sqrt vote weight and quadratic token commitment.
+10. **Snapshot voting power**: ERC20Votes snapshot via `getPastVotes` at proposal snapshot block.
+11. **Quorum logic**: quorum enforced via Governor quorum module and tested in governance tests.
+12. **Critical events**: includes `ProposalCreated`, `VoteCast`, and `ProposalExecuted` through Governor flow.
+13. **Wallet connect test IDs**: frontend has `data-testid="connect-wallet-button"` and `data-testid="user-address"`.
+14. **Proposal list test ID**: frontend renders proposals with `data-testid="proposal-list-item"` including title + status.
+15. **Vote button test IDs**: active proposals expose `vote-for-button`, `vote-against-button`, `vote-abstain-button` and submit on-chain tx.
+
+## Frontend Test IDs (for automation)
+
+- `connect-wallet-button`
+- `user-address`
+- `proposal-list-item`
+- `vote-for-button`
+- `vote-against-button`
+- `vote-abstain-button`
+
 ## Security Notes
 
 - Replay protection on mint and unlock paths via nonce tracking
