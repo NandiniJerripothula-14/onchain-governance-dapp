@@ -8,6 +8,8 @@ cache/
 coverage/
 frontend/.next/
 frontend/out/
+deployments/*.json
+relayer_data/*.json
 
 # Env files
 .env
