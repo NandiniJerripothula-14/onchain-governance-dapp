@@ -1,0 +1,9 @@
+{
+  "network": "chainA",
+  "chainId": 1111,
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "relayer": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+  "VaultToken": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+  "BridgeLock": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+  "GovernanceEmergency": "0x04C89607413713Ec9775E14b954286519d836FEf"
+}

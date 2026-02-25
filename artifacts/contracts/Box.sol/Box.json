@@ -1,0 +1,50 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Box",
+  "sourceName": "contracts/Box.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "ValueChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "store",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "value",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f80fd5b5060df8061001b5f395ff3fe6080604052348015600e575f80fd5b50600436106030575f3560e01c80633fa4f2451460345780636057361d146048575b5f80fd5b5f5460405190815260200160405180910390f35b605760533660046093565b6059565b005b5f8190556040518181527f93fe6d397c74fdf1402a8b72e47b68512f0510d7b98a4bc4cbdf6ac7108b3c599060200160405180910390a150565b5f6020828403121560a2575f80fd5b503591905056fea2646970667358221220d0f6504a70029f40bbf8f1ce07fa5892c722f994cc19f14badd6c84773956c4164736f6c634300081a0033",
+  "deployedBytecode": "0x6080604052348015600e575f80fd5b50600436106030575f3560e01c80633fa4f2451460345780636057361d146048575b5f80fd5b5f5460405190815260200160405180910390f35b605760533660046093565b6059565b005b5f8190556040518181527f93fe6d397c74fdf1402a8b72e47b68512f0510d7b98a4bc4cbdf6ac7108b3c599060200160405180910390a150565b5f6020828403121560a2575f80fd5b503591905056fea2646970667358221220d0f6504a70029f40bbf8f1ce07fa5892c722f994cc19f14badd6c84773956c4164736f6c634300081a0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

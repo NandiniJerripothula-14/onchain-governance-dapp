@@ -1,0 +1,35 @@
+{
+  "name": "onchain-governance-dapp",
+  "version": "1.0.0",
+  "description": "On-chain governance dApp with ERC20Votes and OpenZeppelin Governor",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:bridge": "hardhat test test/bridge.system.test.js",
+    "test:e2e-script": "node tests/e2e-flow-test.js",
+    "test:governance-script": "node tests/governance-emergency-test.js",
+    "test:recovery-script": "node tests/relayer-recovery-test.js",
+    "node": "hardhat node --hostname 0.0.0.0 --port 8545 --config hardhat.chain-a.config.js",
+    "node:chain-a": "hardhat node --hostname 0.0.0.0 --port 8545 --config hardhat.chain-a.config.js",
+    "node:chain-b": "hardhat node --hostname 0.0.0.0 --port 9545 --config hardhat.chain-b.config.js",
+    "deploy:chain-a": "hardhat run scripts/deploy-chain-a.js --network chainA",
+    "deploy:chain-b": "hardhat run scripts/deploy-chain-b.js --network chainB",
+    "deploy:local": "npm run deploy:chain-a ; npm run deploy:chain-b",
+    "relayer:start": "node relayer/src/index.js",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "ethers": "^6.15.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "dotenv": "^17.3.1",
+    "hardhat": "^2.26.0"
+  }
+}

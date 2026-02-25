@@ -1,0 +1,10 @@
+FROM node:20-alpine
+
+WORKDIR /app/frontend
+RUN apk add --no-cache curl
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend .
+
+EXPOSE 3000
+CMD ["npm", "run", "dev"]

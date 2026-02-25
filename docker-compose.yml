@@ -1,0 +1,139 @@
+services:
+  chain-a:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardhat
+      args:
+        HARDHAT_CONFIG: hardhat.chain-a.config.js
+        NODE_PORT: 8545
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "-X",
+          "POST",
+          "--data",
+          "{\"jsonrpc\":\"2.0\",\"method\":\"eth_chainId\",\"params\":[],\"id\":1}",
+          "-H",
+          "Content-Type: application/json",
+          "http://localhost:8545"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  chain-b:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardhat
+      args:
+        HARDHAT_CONFIG: hardhat.chain-b.config.js
+        NODE_PORT: 9545
+    ports:
+      - "9545:9545"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "-X",
+          "POST",
+          "--data",
+          "{\"jsonrpc\":\"2.0\",\"method\":\"eth_chainId\",\"params\":[],\"id\":1}",
+          "-H",
+          "Content-Type: application/json",
+          "http://localhost:9545"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  deployer:
+    build:
+      context: .
+      dockerfile: Dockerfile.hardhat
+      args:
+        HARDHAT_CONFIG: hardhat.chain-a.config.js
+        NODE_PORT: 8545
+    command:
+      [
+        "sh",
+        "-lc",
+        "npx hardhat --config hardhat.config.js run scripts/deploy-chain-a.js --network chainA ; npx hardhat --config hardhat.config.js run scripts/deploy-chain-b.js --network chainB"
+      ]
+    environment:
+      - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      - RELAYER_ADDRESS=${RELAYER_ADDRESS:-0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC}
+      - CHAIN_A_RPC_URL=http://chain-a:8545
+      - CHAIN_B_RPC_URL=http://chain-b:9545
+    volumes:
+      - ./deployments:/app/deployments
+    depends_on:
+      chain-a:
+        condition: service_healthy
+      chain-b:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/deployments/chain-a.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  relayer:
+    build:
+      context: ./relayer
+      dockerfile: Dockerfile
+    restart: on-failure
+    environment:
+      - CHAIN_A_RPC_URL=http://chain-a:8545
+      - CHAIN_B_RPC_URL=http://chain-b:9545
+      - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      - RELAYER_PRIVATE_KEY=${RELAYER_PRIVATE_KEY:-0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a}
+      - CONFIRMATION_DEPTH=${CONFIRMATION_DEPTH:-3}
+      - DB_PATH=${DB_PATH:-/usr/src/app/data/processed_nonces.json}
+      - CHAIN_A_BRIDGE_LOCK=${CHAIN_A_BRIDGE_LOCK:-}
+      - CHAIN_A_GOVERNANCE_EMERGENCY=${CHAIN_A_GOVERNANCE_EMERGENCY:-}
+      - CHAIN_B_BRIDGE_MINT=${CHAIN_B_BRIDGE_MINT:-}
+      - CHAIN_B_GOVERNANCE_VOTING=${CHAIN_B_GOVERNANCE_VOTING:-}
+      - CHAIN_A_DEPLOYMENT_FILE=/usr/src/app/deployments/chain-a.json
+      - CHAIN_B_DEPLOYMENT_FILE=/usr/src/app/deployments/chain-b.json
+      - POLL_INTERVAL_MS=${POLL_INTERVAL_MS:-3000}
+    volumes:
+      - ./relayer_data:/usr/src/app/data
+      - ./deployments:/usr/src/app/deployments
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/usr/src/app/deployments/chain-a.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_RPC_URL=${NEXT_PUBLIC_RPC_URL:-http://chain-a:8545}
+      - NEXT_PUBLIC_GOVERNOR_ADDRESS=${NEXT_PUBLIC_GOVERNOR_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - NEXT_PUBLIC_TOKEN_ADDRESS=${NEXT_PUBLIC_TOKEN_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - NEXT_PUBLIC_BOX_ADDRESS=${NEXT_PUBLIC_BOX_ADDRESS:-0x0000000000000000000000000000000000000000}
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
